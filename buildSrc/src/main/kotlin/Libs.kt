@@ -126,6 +126,7 @@ object Libs {
             const val lifecycle = "androidx.lifecycle:lifecycle-viewmodel-compose:$version"
         }
 
+        const val documentFile = "androidx.documentfile:documentfile:1.0.1"
         const val vectorDrawable = "androidx.vectordrawable:vectordrawable:1.2.0"
         const val preferencesKtx = "androidx.preference:preference-ktx:1.2.1"
 

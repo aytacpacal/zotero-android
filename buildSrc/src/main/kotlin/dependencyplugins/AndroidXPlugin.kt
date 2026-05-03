@@ -16,6 +16,7 @@ private fun configure(project: Project) {
         add("implementation", Libs.AndroidX.fragment)
         add("implementation", Libs.AndroidX.appCompat)
         add("implementation", Libs.AndroidX.preferencesKtx)
+        add("implementation", Libs.AndroidX.documentFile)
         add("implementation", Libs.AndroidX.vectorDrawable)
         add("implementation", Libs.AndroidX.activity)
         add("implementation", Libs.AndroidX.constraintLayout)

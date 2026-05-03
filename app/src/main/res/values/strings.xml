@@ -38,6 +38,11 @@
 
     <string name="settings_cite_remove_style">Remove Style</string>
 
+    <string name="settings_storage_title">Storage</string>
+    <string name="settings_custom_attachment_directory_title">Custom Attachment Folder</string>
+    <string name="settings_custom_attachment_directory_not_set">Not set — using app internal storage</string>
+    <string name="settings_custom_attachment_directory_hint">Long-press to clear</string>
+
     <string name="items_generating_annotated_pdf">Generating Annotated PDF</string>
 
     <string name="onboarding_access_tagline">Organize research\nhowever you want</string>

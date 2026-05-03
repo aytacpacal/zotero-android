@@ -225,6 +225,7 @@ class PdfReaderViewModel @Inject constructor(
     private lateinit var originalFile: File
     private lateinit var dirtyFile: File
     private lateinit var dirtyUri: Uri
+    private var customDirectoryFileUri: Uri? = null
     private lateinit var pdfUiFragment: PdfUiFragment
     private lateinit var pdfFragment: PdfFragment
     private var onAnnotationUpdatedListener: AnnotationProvider.OnAnnotationUpdatedListener? = null
@@ -489,7 +490,21 @@ class PdfReaderViewModel @Inject constructor(
         this@PdfReaderViewModel.originalFile = screenFileArgs
         fileStore.readerDirtyPdfFolder().deleteRecursively()
         val dirtyFile = fileStore.pdfReaderDirtyFile(this@PdfReaderViewModel.originalFile.name)
-        FileHelper.copyFile(this@PdfReaderViewModel.originalFile, dirtyFile)
+
+        val customDirUriString = defaults.getCustomAttachmentDirectoryUri()
+        var sourcedFromCustomDirectory = false
+        if (customDirUriString != null) {
+            val safUri = fileStore.findFileInCustomDirectory(customDirUriString, originalFile.name)
+            if (safUri != null && fileStore.copyFromCustomDirectory(safUri, dirtyFile)) {
+                this@PdfReaderViewModel.customDirectoryFileUri = safUri
+                sourcedFromCustomDirectory = true
+            }
+        }
+        if (!sourcedFromCustomDirectory) {
+            FileHelper.copyFile(this@PdfReaderViewModel.originalFile, dirtyFile)
+            this@PdfReaderViewModel.customDirectoryFileUri = null
+        }
+
         this@PdfReaderViewModel.dirtyFile = dirtyFile
         this@PdfReaderViewModel.dirtyUri = dirtyFile.toUri()
     }
@@ -2502,8 +2517,17 @@ class PdfReaderViewModel @Inject constructor(
             return
         }
         submitPendingPage(pdfUiFragment.pageIndex)
+        saveToCustomDirectoryIfNeeded()
         if (isChangingConfigurations) {
             removeFragment()
+        }
+    }
+
+    private fun saveToCustomDirectoryIfNeeded() {
+        val targetUri = customDirectoryFileUri ?: return
+        if (!this::dirtyFile.isInitialized || !dirtyFile.exists()) return
+        viewModelScope.launch(dispatcher) {
+            fileStore.writeToCustomDirectory(dirtyFile, targetUri)
         }
     }
 

@@ -3,6 +3,7 @@ package org.zotero.android.files
 import android.content.Context
 import android.content.res.AssetManager
 import android.net.Uri
+import androidx.documentfile.provider.DocumentFile
 import com.google.common.base.Charsets
 import com.google.common.io.Files
 import com.google.gson.Gson
@@ -441,6 +442,52 @@ class FileStore @Inject constructor (
         context.contentResolver.openInputStream(uri)
 
     fun getType(uri: Uri): MimeType? = context.contentResolver.getType(uri)
+
+    /**
+     * Looks for [filename] directly inside the SAF tree rooted at [treeUriString].
+     * Returns the document's content URI if found, null otherwise.
+     */
+    fun findFileInCustomDirectory(treeUriString: String, filename: String): Uri? {
+        return try {
+            val treeUri = Uri.parse(treeUriString)
+            val root = DocumentFile.fromTreeUri(context, treeUri) ?: return null
+            val match = root.findFile(filename) ?: return null
+            if (match.isFile) match.uri else null
+        } catch (e: Exception) {
+            Timber.e(e, "findFileInCustomDirectory failed")
+            null
+        }
+    }
+
+    /**
+     * Copies a file from a SAF content URI into [destFile] on the internal filesystem.
+     */
+    fun copyFromCustomDirectory(sourceUri: Uri, destFile: File): Boolean {
+        return try {
+            context.contentResolver.openInputStream(sourceUri)?.use { input ->
+                destFile.outputStream().use { output -> input.copyTo(output) }
+            }
+            true
+        } catch (e: Exception) {
+            Timber.e(e, "copyFromCustomDirectory failed")
+            false
+        }
+    }
+
+    /**
+     * Overwrites the SAF document at [targetUri] with the contents of [sourceFile].
+     */
+    fun writeToCustomDirectory(sourceFile: File, targetUri: Uri): Boolean {
+        return try {
+            context.contentResolver.openOutputStream(targetUri, "wt")?.use { output ->
+                sourceFile.inputStream().use { input -> input.copyTo(output) }
+            }
+            true
+        } catch (e: Exception) {
+            Timber.e(e, "writeToCustomDirectory failed")
+            false
+        }
+    }
 
     val jsonCache: File get() {
         return File(getRootDirectory(), "jsons")

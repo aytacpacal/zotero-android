@@ -76,6 +76,8 @@ open class Defaults @Inject constructor(
     private val webDavScheme = "webDavScheme"
     private val webDavPassword = "webDavPassword"
 
+    private val customAttachmentDirectoryUri = "customAttachmentDirectoryUri"
+
     private val sharedPreferences: SharedPreferences by lazy {
         context.getSharedPreferences(
             sharedPrefsFile,
@@ -380,6 +382,14 @@ open class Defaults @Inject constructor(
 
     fun getWebDavPassword(): String? {
         return sharedPreferences.getString(webDavPassword, null )
+    }
+
+    fun setCustomAttachmentDirectoryUri(uri: String?) {
+        sharedPreferences.edit { putString(customAttachmentDirectoryUri, uri) }
+    }
+
+    fun getCustomAttachmentDirectoryUri(): String? {
+        return sharedPreferences.getString(customAttachmentDirectoryUri, null)
     }
 
     fun setWebDavUrl(str: String?) {
